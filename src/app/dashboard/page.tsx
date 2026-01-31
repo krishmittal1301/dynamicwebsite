@@ -19,17 +19,34 @@ export default async function Dashboard() {
   return (
     <div className="min-h-screen bg-[#0A0A0A] p-12 text-white">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-16">
-          <h1 className="text-5xl font-serif italic text-[#C5A358]">
-            Managed Legacies
-          </h1>
-          <Link
-            href="/onboarding" //
-            className="border border-[#C5A358] px-8 py-3 text-[10px] uppercase tracking-widest text-[#C5A358] hover:bg-[#C5A358] hover:text-black transition-all"
-          >
-            + New Venue
-          </Link>
-        </div>
+<div className="flex justify-between items-end mb-16">
+  <div>
+    <h1 className="text-5xl font-serif italic text-[#C5A358]">
+      Managed Legacies
+    </h1>
+    <p className="text-[10px] uppercase tracking-[0.3em] text-gray-500 mt-4">
+      System Control Panel
+    </p>
+  </div>
+  
+  <div className="flex gap-4">
+    {/* Team Management Button */}
+    <Link
+      href="/dashboard/admins"
+      className="border border-white/10 px-8 py-3 text-[10px] uppercase tracking-widest text-gray-400 hover:border-white hover:text-white transition-all flex items-center gap-2"
+    >
+      Create new Admin 
+    </Link>
+
+    {/* New Venue Button */}
+    <Link
+      href="/onboarding"
+      className="border border-[#C5A358] px-8 py-3 text-[10px] uppercase tracking-widest text-[#C5A358] hover:bg-[#C5A358] hover:text-black transition-all"
+    >
+      + New Venue
+    </Link>
+  </div>
+</div>
 
         <div className="grid gap-6">
           {venues.map((venue) => (

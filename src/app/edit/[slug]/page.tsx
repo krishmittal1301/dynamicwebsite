@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"; //
 import OnboardingForm from "@/app/onboarding/page"; // Adjust path to your form location
 
 export default async function EditVenue({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+  const { slug } = await params;
 
   // Fetch the existing record to hydrate the form on the server
   const venue = await prisma.venue.findUnique({
