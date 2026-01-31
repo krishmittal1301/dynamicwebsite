@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+
+}
+
+
+model Venue {
+  id                 String         @id @default(uuid()) @db.Uuid
+  slug               String         @unique
+  name               String
+  tagline            String?
+  about_description  String?
+  about_image_url    String?
+  events_hosted      String?        @default("0")
+  total_capacity     String?        @default("0")
+  satisfaction_rate  String?        @default("100%")
+  brand_year         String?        @default("2024")
+  contact_address    String?
+  contact_phone      String?
+  contact_email      String?
+  opening_hours      String?        @default("Mon - Sun: 10 AM - 10 PM")
+  menu_dishes        Json?          @default("[]")
+  menu_drinks        Json?          @default("[]")
+  gallery_urls       String[]       @default([])
+  social_links       Json?          @default("{\"twitter\": \"\", \"facebook\": \"\", \"linkedin\": \"\", \"instagram\": \"\"}")
+  video_url          String?
+  latitude           Decimal?
+  longitude          Decimal?
+  primary_color      String?        @default("#C5A358")
+  font_family        String?        @default("serif")
+  bg_style           String?        @default("onyx")
+  border_style       String?        @default("sharp")
+  button_style       String?        @default("outline")
+  header_layout      String?        @default("classic")
+  logo_url           String?
+  bookmyshow_link    String?
+  sortmyscene_link   String?
+  district_link      String?
+  highape_link       String?
+  created_at         DateTime?      @default(now()) @db.Timestamptz(6)
+  
+  // Relations
+  events             VenueEvent[]
+  table_bookings     TableBooking[]
+  inquiries          Inquiry[]
+
+  @@map("venues")
+}
+
+model VenueEvent {
+  id             String         @id @default(uuid()) @db.Uuid
+  venue_id       String?        @db.Uuid
+  title          String
+  event_type     String?
+  event_date     DateTime       @db.Date
+  event_time     String?        @default("10 PM Onwards")
+  headliner      String?
+  image_url      String?
+  description    String?
+  created_at     DateTime?      @default(now()) @db.Timestamptz(6)
+  
+  venue          Venue?         @relation(fields: [venue_id], references: [id])
+  table_bookings TableBooking[]
+
+  @@map("venue_events")
+}
+
+model TableBooking {
+  id          String    @id @default(uuid()) @db.Uuid
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  venue_id    String?   @db.Uuid
+  event_id    String?   @db.Uuid
+  name        String
+  phone       String
+  guest_count Int
+  table_type  String    @default("VIP Lounge")
+  status      String?   @default("pending")
+
+  venue       Venue?      @relation(fields: [venue_id], references: [id])
+  event       VenueEvent? @relation(fields: [event_id], references: [id])
+
+  @@map("table_bookings")
+}
+
+model Inquiry {
+  id          String    @id @default(uuid()) @db.Uuid
+  venue_id    String?   @db.Uuid
+  name        String
+  email       String
+  phone       String?
+  event_date  DateTime? @db.Date
+  guest_count Int?
+  event_type  String?
+  message     String?
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  status      String   @default("pending") 
+
+  venue       Venue?    @relation(fields: [venue_id], references: [id])
+
+  @@map("inquiries")
+}
+
+model Admin {
+  id            String   @id @default(uuid()) @db.Uuid
+  email         String   @unique
+  password_hash String   // You'll store encrypted passwords here
+  name          String?
+  role          String   @default("admin") // Can be 'admin' or 'editor'
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("admins")
+}
