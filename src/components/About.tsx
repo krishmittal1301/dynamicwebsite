@@ -50,7 +50,7 @@ export default function About({
           <div className="space-y-8">
             <div className="space-y-2">
               <span style={accentStyle} className="text-xs tracking-[0.4em] uppercase font-medium">
-                Our Legacy
+                Our Venue
               </span>
               <h2 className="text-6xl text-white leading-tight">
                 About <span className="italic font-light" style={accentStyle}>{name}</span>

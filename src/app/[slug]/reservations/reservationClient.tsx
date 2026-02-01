@@ -25,7 +25,7 @@ export default function ReservationsClient({ venue, slug }: { venue: any, slug: 
             {venue.name} <span className="text-white/50">Reservations</span>
           </h1>
           <p className="text-[10px] tracking-[0.4em] uppercase text-gray-500">
-            Secure and Manage Your Venue's Legacy
+            Secure and Manage Your Venue's Venue
           </p>
         </header>
 

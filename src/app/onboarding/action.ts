@@ -2,16 +2,26 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/auth"; //
+
 
 export async function saveVenue(data: any) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      throw new Error("You must be logged in to save a venue.");
+    }
+
     const { events, instagram, facebook, twitter, ...venueData } = data;
 
     // 1. Upsert the Venue
     const savedVenue = await prisma.venue.upsert({
       where: { slug: venueData.slug },
       update: venueData,
-      create: venueData,
+      create: {
+        ...venueData,
+        owner_id: session.user.id, // Sets the owner on creation
+      },
     });
 
     // 2. Handle Events safely

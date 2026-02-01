@@ -88,18 +88,6 @@ export default function OnboardingForm({ initialData, isEditing }: Props) {
   const [galleryItems, setGalleryItems] = useState([
     { file: null as File | null, url: "" },
   ]);
-  const [events, setEvents] = useState([
-    {
-      title: "",
-      event_type: "Club Night",
-      event_date: "",
-      event_time: "",
-      headliner: "",
-      description: "",
-      image_url: "",
-      image_file: null as File | null,
-    },
-  ]);
   const inputClasses =
     "w-full bg-transparent border-b border-white/10 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#C5A358] transition-colors font-light text-sm";
   const labelClasses =
@@ -170,23 +158,8 @@ export default function OnboardingForm({ initialData, isEditing }: Props) {
           initialData.gallery_urls.map((url: string) => ({ file: null, url })),
         );
       }
-
-      // Fetch related events
-      // fetchEvents(initialData.id);
     }
   }, [initialData]);
-
-  // async function fetchEvents(venueId: string) {
-  //   const { data } = await supabase
-  //     .from("venue_events")
-  //     .select("*")
-  //     .eq("venue_id", venueId);
-  //   if (data) setEvents(data);
-  // }
-  // const venue = await prisma.venue.findUnique({
-  //   where: { slug: params.slug },
-  //   include: { events: true } // This fetches related events in one go
-  // });
 
 
   const handleLaunch = async (e: React.FormEvent) => {
@@ -233,18 +206,6 @@ export default function OnboardingForm({ initialData, isEditing }: Props) {
         ),
       ).then((res) => res.filter(Boolean));
 
-      const eventsToUpload = await Promise.all(
-        events.map(async (ev) => ({
-          title: ev.title,
-          event_type: ev.event_type,
-          event_date: ev.event_date,
-          event_time: ev.event_time,
-          headliner: ev.headliner,
-          description: ev.description,
-          image_url: ev.image_file ? await uploadAsset(ev.image_file, "events") : ev.image_url,
-        }))
-      );
-
       const slug = formData.name.toLowerCase().replace(/\s+/g, "-");
 
       // --- CRITICAL FIX: Destructure social handles out of the payload ---
@@ -276,7 +237,6 @@ export default function OnboardingForm({ initialData, isEditing }: Props) {
           facebook: formData.facebook || formData.facebook_handle,
           twitter: formData.twitter || formData.twitter_handle,
         },
-        events: eventsToUpload, // Sent to Server Action to handle relationships
       };
 
       // 6. CALL SERVER ACTION (PRISMA)
@@ -302,7 +262,7 @@ export default function OnboardingForm({ initialData, isEditing }: Props) {
         <header className="text-center">
           <h1 className="text-6xl md:text-8xl font-serif tracking-tighter text-white">
             {isEditing ? "Refine" : "Establish"}{" "}
-            <span className="italic font-light text-[#C5A358]">Legacy</span>
+            <span className="italic font-light text-[#C5A358]">Venue</span>
           </h1>
         </header>
 
@@ -435,7 +395,7 @@ export default function OnboardingForm({ initialData, isEditing }: Props) {
                     <div className="text-gray-700 flex flex-col items-center gap-2">
                       <Camera size={24} />
                       <span className="text-[10px] uppercase tracking-widest">
-                        Upload Motion Legacy
+                        Upload Motion Venue
                       </span>
                     </div>
                   )}
@@ -817,124 +777,6 @@ export default function OnboardingForm({ initialData, isEditing }: Props) {
           </div>
         </section>
 
-        {/* EVENTS MANAGEMENT SECTION */}
-        <section>
-          <div className="flex justify-between items-end mb-12">
-            <h2 className={sectionTitle}>
-              <Calendar size={24} className="text-[#C5A358]" /> Curated Events
-            </h2>
-            <button
-              type="button"
-              onClick={() =>
-                setEvents([
-                  ...events,
-                  {
-                    title: "",
-                    event_type: "Club Night",
-                    event_date: "",
-                    event_time: "",
-                    headliner: "",
-                    description: "",
-                  },
-                ])
-              }
-              className="text-[#C5A358] text-[10px] tracking-[0.4em] uppercase"
-            >
-              + Add Event
-            </button>
-          </div>
-          <div className="grid gap-8">
-            {events.map((ev, i) => (
-              <div
-                key={i}
-                className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 bg-white/[0.02] p-8 border border-white/5 relative"
-              >
-                <input
-                  placeholder="Event Title"
-                  value={ev.title}
-                  className={inputClasses}
-                  onChange={(e) => {
-                    const n = [...events];
-                    n[i].title = e.target.value;
-                    setEvents(n);
-                  }}
-                />
-                <input
-                  placeholder="Event Type (e.g. Techno)"
-                  value={ev.event_type}
-                  className={inputClasses}
-                  onChange={(e) => {
-                    const n = [...events];
-                    n[i].event_type = e.target.value;
-                    setEvents(n);
-                  }}
-                />
-                <input
-                  type="date"
-                  value={ev.event_date}
-                  className={inputClasses}
-                  onChange={(e) => {
-                    const n = [...events];
-                    n[i].event_date = e.target.value;
-                    setEvents(n);
-                  }}
-                />
-                <input
-                  type="time"
-                  value={ev.event_time}
-                  className={inputClasses}
-                  onChange={(e) => {
-                    const n = [...events];
-                    n[i].event_time = e.target.value;
-                    setEvents(n);
-                  }}
-                />
-                <input
-                  placeholder="Headliner"
-                  value={ev.headliner}
-                  className={inputClasses}
-                  onChange={(e) => {
-                    const n = [...events];
-                    n[i].headliner = e.target.value;
-                    setEvents(n);
-                  }}
-                />
-                <input
-                  placeholder="Brief Description"
-                  value={ev.description}
-                  className={inputClasses}
-                  onChange={(e) => {
-                    const n = [...events];
-                    n[i].description = e.target.value;
-                    setEvents(n);
-                  }}
-                />
-
-                {/* Event Image Upload */}
-                <div className="flex items-center gap-4">
-                  <input
-                    type="file"
-                    onChange={(e) => {
-                      const n = [...events];
-                      n[i].image_file = e.target.files?.[0] || null;
-                      setEvents(n);
-                    }}
-                  />
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setEvents(events.filter((_, idx) => idx !== i))
-                  }
-                  className="absolute -top-2 -right-2 text-red-900 bg-black rounded-full p-1"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
 
         <section className="space-y-12">
           <h2 className={sectionTitle}>
@@ -1181,7 +1023,7 @@ export default function OnboardingForm({ initialData, isEditing }: Props) {
           >
             <div className="absolute inset-0 bg-[#C5A358] translate-y-full transition-transform duration-500 group-hover:translate-y-0" />
             <span className="relative z-10 font-serif">
-              {loading ? "Establishing Legacy..." : "Launch Grand Website"}
+              {loading ? "Establishing Venue..." : "Launch Grand Website"}
             </span>
           </button>
         </div>

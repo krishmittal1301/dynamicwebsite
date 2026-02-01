@@ -1,6 +1,9 @@
+-- CreateEnum
+CREATE TYPE "AdminRole" AS ENUM ('SUPER_ADMIN', 'VENUE_OWNER');
+
 -- CreateTable
 CREATE TABLE "venues" (
-    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "id" UUID NOT NULL,
     "slug" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "tagline" TEXT,
@@ -32,6 +35,7 @@ CREATE TABLE "venues" (
     "sortmyscene_link" TEXT,
     "district_link" TEXT,
     "highape_link" TEXT,
+    "owner_id" UUID,
     "created_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "venues_pkey" PRIMARY KEY ("id")
@@ -39,7 +43,7 @@ CREATE TABLE "venues" (
 
 -- CreateTable
 CREATE TABLE "venue_events" (
-    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "id" UUID NOT NULL,
     "venue_id" UUID,
     "title" TEXT NOT NULL,
     "event_type" TEXT,
@@ -55,7 +59,7 @@ CREATE TABLE "venue_events" (
 
 -- CreateTable
 CREATE TABLE "table_bookings" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL,
     "created_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
     "venue_id" UUID,
     "event_id" UUID,
@@ -70,7 +74,7 @@ CREATE TABLE "table_bookings" (
 
 -- CreateTable
 CREATE TABLE "inquiries" (
-    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "id" UUID NOT NULL,
     "venue_id" UUID,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -80,17 +84,18 @@ CREATE TABLE "inquiries" (
     "event_type" TEXT,
     "message" TEXT,
     "created_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
+    "status" TEXT NOT NULL DEFAULT 'pending',
 
     CONSTRAINT "inquiries_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "admins" (
-    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "id" UUID NOT NULL,
     "email" TEXT NOT NULL,
     "password_hash" TEXT NOT NULL,
     "name" TEXT,
-    "role" TEXT NOT NULL DEFAULT 'admin',
+    "role" "AdminRole" NOT NULL DEFAULT 'VENUE_OWNER',
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "admins_pkey" PRIMARY KEY ("id")
@@ -101,6 +106,9 @@ CREATE UNIQUE INDEX "venues_slug_key" ON "venues"("slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "admins_email_key" ON "admins"("email");
+
+-- AddForeignKey
+ALTER TABLE "venues" ADD CONSTRAINT "venues_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "venue_events" ADD CONSTRAINT "venue_events_venue_id_fkey" FOREIGN KEY ("venue_id") REFERENCES "venues"("id") ON DELETE SET NULL ON UPDATE CASCADE;

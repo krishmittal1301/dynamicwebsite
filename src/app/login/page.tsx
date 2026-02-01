@@ -1,36 +1,64 @@
-// src/app/login/page.tsx
 "use client";
 
-import { loginAdmin } from "./action";
+import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // This calls the 'authorize' function you wrote in auth.ts
+    console.log("🚀 Starting login process for:", email); // Log start
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    console.log("Login Result:", result);
+
+  if (result?.ok) {
+      // 1. Force a refresh to ensure the session is detected
+      console.log("✅ Authorization Confirmed. Syncing Secure Session...");
+      router.refresh(); 
+      // 2. Redirect to the system control panel
+      router.push("/dashboard");
+    } else {
+      alert("Protocol Error: Invalid Credentials");
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center font-sans">
-      <form action={async (fd) => {
-        const res = await loginAdmin(fd);
-        if (res?.error) setError(res.error);
-      }} className="w-full max-w-md p-12 border border-white/5 bg-white/[0.02] space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-serif italic text-[#C5A358]">Admin Portal</h1>
-          <p className="text-[10px] tracking-[0.4em] uppercase text-gray-500">Authorized Access Only</p>
-        </div>
-
-        <div className="space-y-6">
-          <input name="email" type="email" placeholder="Email" required 
-            className="w-full bg-transparent border-b border-white/10 py-3 text-white focus:outline-none focus:border-[#C5A358] transition-colors" />
-          <input name="password" type="password" placeholder="Password" required 
-            className="w-full bg-transparent border-b border-white/10 py-3 text-white focus:outline-none focus:border-[#C5A358] transition-colors" />
-        </div>
-
-        {error && <p className="text-red-500 text-[10px] uppercase tracking-widest text-center">{error}</p>}
-
-        <button type="submit" className="w-full py-4 bg-[#C5A358] text-black text-[10px] font-bold uppercase tracking-[0.4em] hover:bg-white transition-all">
-          Verify Identity
-        </button>
-      </form>
+    <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center text-white p-6">
+      <div className="w-full max-w-md bg-white/[0.02] border border-white/10 p-10">
+        <h1 className="text-4xl font-serif italic text-[#C5A358] mb-2">Protocol</h1>
+        <p className="text-[10px] uppercase tracking-[0.3em] text-gray-500 mb-8">System Authentication</p>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <input 
+            type="email" 
+            placeholder="ADMIN EMAIL"
+            className="w-full bg-white/5 border border-white/10 p-4 outline-none focus:border-[#C5A358] transition-all text-sm"
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input 
+            type="password" 
+            placeholder="SECURITY KEY"
+            className="w-full bg-white/5 border border-white/10 p-4 outline-none focus:border-[#C5A358] transition-all text-sm"
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button className="w-full bg-[#C5A358] text-black py-4 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-white transition-all">
+            Authorize Entry
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

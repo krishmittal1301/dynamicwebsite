@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma"; //
-import { notFound } from "next/navigation"; //
+import { notFound, redirect } from "next/navigation"; //
 
 // Importing your components
 import Hero from "@/components/Hero";
@@ -36,6 +36,15 @@ export default async function VenuePage({ params }: { params: { slug: string } }
   // If created_at is a Date object, you should also serialize it
   created_at: venueData.created_at?.toISOString() || null,
 };
+  if (!venueData.is_active) {
+    // Option A: Redirect to a dedicated maintenance page
+    redirect(`/${slug}/maintenance`);
+    
+    // Option B: Or just show a simple maintenance message right here
+    /* return <MaintenanceMode venueName={venueData.name} />; 
+    */
+  }
+
 
   const themeStyles = {
     "--primary-gold": venue.primary_color,

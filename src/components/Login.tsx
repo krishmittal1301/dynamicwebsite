@@ -53,7 +53,7 @@ export default function Login({
             Admin <span style={accentColor}>Access</span>
           </h2>
           <p className="text-[9px] tracking-[0.5em] text-gray-500 uppercase">
-            Verify Identity to Manage Legacy
+            Verify Identity to Manage Venues
           </p>
         </div>
 

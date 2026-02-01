@@ -1,26 +1,24 @@
 // src/middleware.ts
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { auth } from "@/auth";
 
-export function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl;
-    const session = request.cookies.get("admin_session");
+export default auth((req) => {
+  const { nextUrl } = req;
+  const isLoggedIn = !!req.auth;
 
-    // 1. Check for standard admin prefixes
-    const protectedPrefixes = ['/dashboard', '/onboarding', '/edit'];
-    const isProtectedPrefix = protectedPrefixes.some(path => pathname.startsWith(path));
+  // 1. Define your protected routes
+  const isDashboard = nextUrl.pathname.startsWith("/dashboard");
+  const isOnboarding = nextUrl.pathname.startsWith("/onboarding");
+  const isEdit = nextUrl.pathname.startsWith("/edit");
+  const isReservationPage = nextUrl.pathname.endsWith("/reservations");
 
-    // 2. Check for the dynamic dynamic [slug]/reservations
-    const isReservationPage = pathname.endsWith('/reservations');
+  // 2. If it's a protected route and not logged in, redirect to login
+  if ((isDashboard || isOnboarding || isEdit || isReservationPage) && !isLoggedIn) {
+    return NextResponse.redirect(new URL("/login", nextUrl));
+  }
 
-    // 3. FIX: Use OR (||) instead of AND (&&)
-    // We want to redirect if (Any Protected Path) AND (No Session)
-    if ((isProtectedPrefix || isReservationPage) && !session) {
-        return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    return NextResponse.next();
-}
+  return NextResponse.next();
+});
 
 export const config = {
   matcher: [

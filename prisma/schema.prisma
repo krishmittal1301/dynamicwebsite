@@ -48,7 +48,10 @@ model Venue {
   sortmyscene_link   String?
   district_link      String?
   highape_link       String?
+  owner_id          String?        @db.Uuid
+  owner             Admin?         @relation(fields: [owner_id], references: [id])
   created_at         DateTime?      @default(now()) @db.Timestamptz(6)
+  is_active   Boolean   @default(true)
   
   // Relations
   events             VenueEvent[]
@@ -111,13 +114,19 @@ model Inquiry {
   @@map("inquiries")
 }
 
+enum AdminRole {
+  SUPER_ADMIN
+  VENUE_OWNER
+}
+
 model Admin {
   id            String   @id @default(uuid()) @db.Uuid
   email         String   @unique
   password_hash String   // You'll store encrypted passwords here
   name          String?
-  role          String   @default("admin") // Can be 'admin' or 'editor'
+  role          AdminRole   @default(VENUE_OWNER)
   created_at    DateTime @default(now()) @db.Timestamptz(6)
+  venues        Venue[]
 
   @@map("admins")
 }
