@@ -11,13 +11,9 @@ import {
   Image as ImageIcon,
   Globe,
   Award,
-  Users,
-  Calendar,
   Phone,
   Mail,
   MapPin,
-  Utensils,
-  GlassWater,
   Instagram,
   Facebook,
   Twitter,
@@ -67,24 +63,6 @@ export default function OnboardingForm({ initialData, isEditing }: Props) {
   });
 
   const [aboutImage, setAboutImage] = useState<File | null>(null);
-  const [dishes, setDishes] = useState([
-    {
-      name: "",
-      price: "",
-      description: "",
-      image: null as File | null,
-      image_url: "",
-    },
-  ]);
-  const [drinks, setDrinks] = useState([
-    {
-      name: "",
-      price: "",
-      description: "",
-      image: null as File | null,
-      image_url: "",
-    },
-  ]);
   const [galleryItems, setGalleryItems] = useState([
     { file: null as File | null, url: "" },
   ]);
@@ -148,10 +126,6 @@ export default function OnboardingForm({ initialData, isEditing }: Props) {
         highape_link: initialData.highape_link || "",
       });
 
-      // Pre-fill JSONB arrays
-      if (initialData.menu_dishes) setDishes(initialData.menu_dishes);
-      if (initialData.menu_drinks) setDrinks(initialData.menu_drinks);
-
       // Pre-fill Gallery URLs
       if (initialData.gallery_urls) {
         setGalleryItems(
@@ -177,28 +151,6 @@ export default function OnboardingForm({ initialData, isEditing }: Props) {
       if (videoFile) {
         finalVideoUrl = await uploadAsset(videoFile, "videos");
       }
-
-      const menu_dishes = await Promise.all(
-        dishes.map(async (d) => ({
-          name: d.name,
-          price: d.price,
-          description: d.description,
-          image_url: d.image
-            ? await uploadAsset(d.image, "dishes")
-            : d.image_url,
-        })),
-      );
-
-      const menu_drinks = await Promise.all(
-        drinks.map(async (d) => ({
-          name: d.name,
-          price: d.price,
-          description: d.description,
-          image_url: d.image
-            ? await uploadAsset(d.image, "drinks")
-            : d.image_url,
-        })),
-      );
 
       const gallery_urls = await Promise.all(
         galleryItems.map(async (item) =>
@@ -227,8 +179,6 @@ export default function OnboardingForm({ initialData, isEditing }: Props) {
         about_image_url: aboutImageUrl,
         logo_url: logoUrl,
         video_url: finalVideoUrl,
-        menu_dishes,
-        menu_drinks,
         gallery_urls,
         latitude: parseFloat(formData.latitude) || 0,
         longitude: parseFloat(formData.longitude) || 0,
@@ -466,199 +416,6 @@ export default function OnboardingForm({ initialData, isEditing }: Props) {
           </div>
         </section>
 
-        {/* CULINARY SECTION (DISHES) */}
-        <section>
-          <div className="flex justify-between items-end mb-12">
-            <h2 className={sectionTitle}>
-              <Utensils size={24} className="text-[#C5A358]" /> Culinary
-              Selection
-            </h2>
-            <button
-              type="button"
-              onClick={() =>
-                setDishes([
-                  ...dishes,
-                  { name: "", price: "", description: "", image: null },
-                ])
-              }
-              className="text-[#C5A358] text-[10px] tracking-[0.4em] uppercase"
-            >
-              + Add Dish
-            </button>
-          </div>
-          <div className="grid gap-8">
-            {dishes.map((dish, i) => (
-              <div
-                key={i}
-                className="flex flex-col md:flex-row gap-10 bg-white/[0.02] p-8 border border-white/5 relative items-center"
-              >
-                <div className="w-32 h-32 bg-black border border-white/10 flex items-center justify-center relative overflow-hidden shrink-0">
-                  {dish.image || dish.image_url ? (
-                    <img
-                      src={
-                        dish.image instanceof File
-                          ? URL.createObjectURL(dish.image)
-                          : dish.image_url
-                      }
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Camera className="text-gray-800" />
-                  )}
-                  <input
-                    type="file"
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                    onChange={(e) => {
-                      const d = [...dishes];
-                      d[i].image = e.target.files?.[0] || null;
-                      setDishes(d);
-                    }}
-                  />
-                </div>
-                <div className="flex-1 grid md:grid-cols-2 gap-6 w-full">
-                  <input
-                    placeholder="Dish Name"
-                    value={dish.name}
-                    className={inputClasses}
-                    onChange={(e) => {
-                      const d = [...dishes];
-                      d[i].name = e.target.value;
-                      setDishes(d);
-                    }}
-                  />
-                  <input
-                    placeholder="Price"
-                    className={inputClasses}
-                    value={dish.price}
-                    onChange={(e) => {
-                      const d = [...dishes];
-                      d[i].price = e.target.value;
-                      setDishes(d);
-                    }}
-                  />
-                  <input
-                    placeholder="Description"
-                    className={`${inputClasses} md:col-span-2`}
-                    value={dish.description}
-                    onChange={(e) => {
-                      const d = [...dishes];
-                      d[i].description = e.target.value;
-                      setDishes(d);
-                    }}
-                  />
-                </div>
-                {dishes.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setDishes(dishes.filter((_, idx) => idx !== i))
-                    }
-                    className="text-red-900 absolute top-4 right-4"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* MIXOLOGY SECTION (DRINKS) */}
-        <section>
-          <div className="flex justify-between items-end mb-12">
-            <h2 className={sectionTitle}>
-              <GlassWater size={24} className="text-[#C5A358]" /> Spirits &
-              Mixology
-            </h2>
-            <button
-              type="button"
-              onClick={() =>
-                setDrinks([
-                  ...drinks,
-                  { name: "", price: "", description: "", image: null },
-                ])
-              }
-              className="text-[#C5A358] text-[10px] tracking-[0.4em] uppercase"
-            >
-              + Add Drink
-            </button>
-          </div>
-          <div className="grid gap-8">
-            {drinks.map((drink, i) => (
-              <div
-                key={i}
-                className="flex flex-col md:flex-row gap-10 bg-white/[0.02] p-8 border border-white/5 relative items-center"
-              >
-                <div className="w-32 h-32 bg-black border border-white/10 flex items-center justify-center relative overflow-hidden shrink-0">
-                  {drink.image || drink.image_url ? (
-                    <img
-                      src={
-                        drink.image instanceof File
-                          ? URL.createObjectURL(drink.image)
-                          : drink.image_url
-                      }
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Camera className="text-gray-800" />
-                  )}
-                  <input
-                    type="file"
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                    onChange={(e) => {
-                      const d = [...drinks];
-                      d[i].image = e.target.files?.[0] || null;
-                      setDrinks(d);
-                    }}
-                  />
-                </div>
-                <div className="flex-1 grid md:grid-cols-2 gap-6 w-full">
-                  <input
-                    placeholder="Drink Name"
-                    value={drink.name}
-                    className={inputClasses}
-                    onChange={(e) => {
-                      const d = [...drinks];
-                      d[i].name = e.target.value;
-                      setDrinks(d);
-                    }}
-                  />
-                  <input
-                    placeholder="Price"
-                    className={inputClasses}
-                    value={drink.price}
-                    onChange={(e) => {
-                      const d = [...drinks];
-                      d[i].price = e.target.value;
-                      setDrinks(d);
-                    }}
-                  />
-                  <input
-                    placeholder="Description"
-                    className={`${inputClasses} md:col-span-2`}
-                    value={drink.description}
-                    onChange={(e) => {
-                      const d = [...drinks];
-                      d[i].description = e.target.value;
-                      setDrinks(d);
-                    }}
-                  />
-                </div>
-                {drinks.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setDrinks(drinks.filter((_, idx) => idx !== i))
-                    }
-                    className="text-red-900 absolute top-4 right-4"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
 
         {/* VISUAL GALLERY */}
         <section>
